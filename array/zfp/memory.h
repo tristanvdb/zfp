@@ -5,19 +5,30 @@
 #include <cstdlib>
 #include "zfp/types.h"
 
-// allocate size bytes with optional alignment
 inline void*
-allocate(size_t size, size_t alignment = 0)
+allocate(size_t size)
+{
+  return new uchar[size];
+}
+
+// allocate size bytes with alignment
+inline void*
+allocate_aligned(size_t size, size_t alignment)
 {
 #if defined(__USE_XOPEN2K) && defined(ZFP_WITH_ALIGNED_ALLOC)
   void* ptr;
-  if (alignment > 1)
-    posix_memalign(&ptr, alignment, size);
-  else
-    ptr = malloc(size);
+
+  #ifdef __MINGW32__
+  ptr = __mingw_aligned_malloc(size, alignment);
+  #elif defined(_WIN32)
+  ptr = _aligned_malloc(size, alignment);
+  #else
+  posix_memalign(&ptr, alignment, size);
+  #endif
+
   return ptr;
 #else
-  return new uchar[size];
+  return malloc(size);
 #endif
 }
 
@@ -26,31 +37,68 @@ template <typename T>
 inline void
 deallocate(T* ptr)
 {
+  delete[] ptr;
+}
+
+template <typename T>
+inline void
+deallocate_aligned(T* ptr)
+{
 #if defined(__USE_XOPEN2K) && defined(ZFP_WITH_ALIGNED_ALLOC)
+
+  if (ptr)
+  #ifdef __MINGW32__
+    __mingw_aligned_free(ptr);
+  #elif defined(_WIN32)
+    _aligned_free(ptr);
+  #else
+    free(ptr);
+  #endif
+
+#else
   if (ptr)
     free(ptr);
-#else
-  delete[] ptr;
 #endif
 }
 
-// reallocate size bytes with optional alignment
+// reallocate size bytes
 template <typename T>
 inline void
-reallocate(T*& ptr, size_t size, size_t alignment = 0)
+reallocate(T*& ptr, size_t size)
 {
   deallocate(ptr);
-  ptr = static_cast<T*>(allocate(size, alignment));
+  ptr = static_cast<T*>(allocate(size));
 }
 
-// clone array 'T src[count]' with optional alignment
 template <typename T>
 inline void
-clone(T*& dst, const T* src, size_t count, size_t alignment = 0)
+reallocate_aligned(T*& ptr, size_t size, size_t alignment)
+{
+  deallocate_aligned(ptr);
+  ptr = static_cast<T*>(allocate_aligned(size, alignment));
+}
+
+// clone array 'T src[count]'
+template <typename T>
+inline void
+clone(T*& dst, const T* src, size_t count)
 {
   deallocate(dst);
   if (src) {
-    dst = static_cast<T*>(allocate(count * sizeof(T), alignment));
+    dst = static_cast<T*>(allocate(count * sizeof(T)));
+    std::copy(src, src + count, dst);
+  }
+  else
+    dst = 0;
+}
+
+template <typename T>
+inline void
+clone_aligned(T*& dst, const T* src, size_t count, size_t alignment)
+{
+  deallocate_aligned(dst);
+  if (src) {
+    dst = static_cast<T*>(allocate_aligned(count * sizeof(T), alignment));
     std::copy(src, src + count, dst);
   }
   else
