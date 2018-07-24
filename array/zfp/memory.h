@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include "zfp/types.h"
 
+namespace zfp {
+
 inline void*
 allocate(size_t size)
 {
@@ -66,16 +68,16 @@ template <typename T>
 inline void
 reallocate(T*& ptr, size_t size)
 {
-  deallocate(ptr);
-  ptr = static_cast<T*>(allocate(size));
+  zfp::deallocate(ptr);
+  ptr = static_cast<T*>(zfp::allocate(size));
 }
 
 template <typename T>
 inline void
 reallocate_aligned(T*& ptr, size_t size, size_t alignment)
 {
-  deallocate_aligned(ptr);
-  ptr = static_cast<T*>(allocate_aligned(size, alignment));
+  zfp::deallocate_aligned(ptr);
+  ptr = static_cast<T*>(zfp::allocate_aligned(size, alignment));
 }
 
 // clone array 'T src[count]'
@@ -83,9 +85,9 @@ template <typename T>
 inline void
 clone(T*& dst, const T* src, size_t count)
 {
-  deallocate(dst);
+  zfp::deallocate(dst);
   if (src) {
-    dst = static_cast<T*>(allocate(count * sizeof(T)));
+    dst = static_cast<T*>(zfp::allocate(count * sizeof(T)));
     std::copy(src, src + count, dst);
   }
   else
@@ -96,13 +98,15 @@ template <typename T>
 inline void
 clone_aligned(T*& dst, const T* src, size_t count, size_t alignment)
 {
-  deallocate_aligned(dst);
+  zfp::deallocate_aligned(dst);
   if (src) {
-    dst = static_cast<T*>(allocate_aligned(count * sizeof(T), alignment));
+    dst = static_cast<T*>(zfp::allocate_aligned(count * sizeof(T), alignment));
     std::copy(src, src + count, dst);
   }
   else
     dst = 0;
+}
+
 }
 
 #endif
