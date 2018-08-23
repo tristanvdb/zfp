@@ -43,6 +43,8 @@ iterators, and views.
 The following sections are available:
 
 * :ref:`array_classes`
+* :ref:`header`
+* :ref:`exceptions`
 * :ref:`caching`
 * :ref:`references`
 * :ref:`pointers`
@@ -106,6 +108,19 @@ Base Class
 
   Return pointer to compressed data for read or write access.  The size
   of the buffer is given by :cpp:func:`compressed_size`.
+
+.. cpp:function:: uint dimensionality() const
+
+  Return the dimensionality of the compressed array.
+
+.. cpp:function:: zfp_type scalar_type() const
+
+  Return the underlying :c:type:`zfp_type` of the compressed array.
+
+.. cpp:function:: void write_header(header& h) const
+
+  Write a header describing this compressed array into struct
+  :cpp:type:`header`.
 
 Common Methods
 ^^^^^^^^^^^^^^
@@ -215,6 +230,16 @@ type is ommitted for readability, e.g.,
   *csize* bytes of cache, and optionally initialized from flat, uncompressed
   array *p*.  If *csize* is zero, a default cache size is chosen.
 
+.. cpp:function:: array1::array1(const header& h, const uchar* buffer, size_t bufferSize = 0)
+.. cpp:function:: array2::array2(const header& h, const uchar* buffer, size_t bufferSize = 0)
+.. cpp:function:: array3::array3(const header& h, const uchar* buffer, size_t bufferSize = 0)
+
+  Constructor of array from previously-serialized compressed array. Struct
+  :cpp:type:`header` contains header information, while *buffer* points to the
+  compressed-data. Optional *bufferSize* argument specifies *buffer* length, in
+  bytes, in case header describes a longer array. Throws
+  :cpp:class:`header_exception` if unable to construct.
+
 .. cpp:function:: array1::array1(const array1& a)
 .. cpp:function:: array2::array2(const array2& a)
 .. cpp:function:: array3::array3(const array3& a)
@@ -267,9 +292,36 @@ type is ommitted for readability, e.g.,
   Return :ref:`proxy reference <references>` to scalar stored at
   multi-dimensional index given by *i*, *j*, and *k* (mutator).
 
+.. include:: header.inc
+.. include:: exceptions.inc
 .. include:: caching.inc
 .. include:: references.inc
 .. include:: pointers.inc
 .. include:: iterators.inc
 .. include:: views.inc
 .. include:: cfp.inc
+
+Serializing and Deserializing Compressed Arrays
+-----------------------------------------------
+
+|zfp|'s compressed arrays can be written to disk and recovered back into an
+object. To serialize a compressed array object, record a header into struct
+:cpp:type:`header` through :cpp:func:`write_header`. Also record the
+compressed-stream (blocks) using :cpp:func:`compressed_data`, having length
+:cpp:func:`compressed_size` (in bytes).
+
+There are two methods to construct a compressed array object from memory. The
+first is to use the correct array type's constructor, which accepts a *header*
+, *buffer*, and an optional *bufferSize* argument. If the wrong array type is
+used, then :cpp:class:`header_exception` is thrown.
+
+The second method is useful when the serialized array type is unknown, but
+described in the header. There is a utility function in zfputils.h
+
+.. cpp:function:: array* construct_from_stream(const header& h, const uchar* buffer, size_t bufferSize = 0)
+
+  Attempts to construct each type of compressed array, returning a pointer to
+  the base class upon success, otherwise returning :c:macro:`NULL`. Just as
+  with the constructor, :cpp:type:`header` holds the header and *buffer* holds
+  the compressed data. Optional *bufferSize* argument specifies *buffer* length
+  , in bytes.
