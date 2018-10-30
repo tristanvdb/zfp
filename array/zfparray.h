@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <climits>
-#include <stdexcept>
 #include "zfp.h"
+#include "zfp/exception.h"
 #include "zfp/memory.h"
 
 // #undef at end of file
@@ -56,7 +56,7 @@ protected:
     // read header to populate member variables associated with zfp_stream
     try {
       read_header(h);
-    } catch (std::invalid_argument const & e) {
+    } catch (zfp::header_exception const & e) {
       zfp_stream_close(zfp);
       throw;
     }
@@ -68,10 +68,9 @@ protected:
       uint mz = ((std::max(nz, 1u)) + 3) / 4;
       size_t blocks = (size_t)mx * (size_t)my * (size_t)mz;
       size_t describedSize = ((blocks * zfp->maxbits + stream_word_bits - 1) & ~(stream_word_bits - 1)) / CHAR_BIT;
-
       if (bufferSize < describedSize) {
         zfp_stream_close(zfp);
-        throw std::invalid_argument("ZFP header expects a longer buffer than what was passed in");
+        throw zfp::header_exception("ZFP header expects a longer buffer than what was passed in");
       }
     }
 
@@ -296,20 +295,20 @@ protected:
 
     // read header to populate member variables associated with zfp_stream
     if (zfp_read_header(zfp, zfh.field, ZFP_HEADER_FULL) != ZFP_HEADER_SIZE_BITS) {
-      throw std::invalid_argument("Invalid ZFP header");
+      throw zfp::header_exception("Invalid ZFP header");
     }
 
     // verify read-header contents
     else if (type != zfh.field->type) {
-      throw std::invalid_argument("ZFP header specified an underlying scalar type different than that for this object");
+      throw zfp::header_exception("ZFP header specified an underlying scalar type different than that for this object");
     }
 
     else if (!is_valid_dims(zfh.field->nx, zfh.field->ny, zfh.field->nz)) {
-      throw std::invalid_argument("ZFP header specified a dimensionality different than that for this object");
+      throw zfp::header_exception("ZFP header specified a dimensionality different than that for this object");
     }
 
     else if (zfp_stream_compression_mode(zfp) != zfp_mode_fixed_rate) {
-      throw std::invalid_argument("ZFP header specified a non fixed-rate mode, unsupported by this object");
+      throw zfp::header_exception("ZFP header specified a non fixed-rate mode, unsupported by this object");
     }
 
     // set class variables

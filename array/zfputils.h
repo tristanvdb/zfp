@@ -13,27 +13,27 @@ zfp::array* construct_from_stream(const zfp::header& header, const uchar* buffer
 {
   try {
     return new zfp::array1f(header, buffer, bufferSize);
-  } catch (const std::invalid_argument& e) {}
+  } catch (const zfp::header_exception& e) {}
 
   try {
     return new zfp::array1d(header, buffer, bufferSize);
-  } catch (const std::invalid_argument& e) {}
+  } catch (const zfp::header_exception& e) {}
 
   try {
     return new zfp::array2f(header, buffer, bufferSize);
-  } catch (const std::invalid_argument& e) {}
+  } catch (const zfp::header_exception& e) {}
 
   try {
     return new zfp::array2d(header, buffer, bufferSize);
-  } catch (const std::invalid_argument& e) {}
+  } catch (const zfp::header_exception& e) {}
 
   try {
     return new zfp::array3f(header, buffer, bufferSize);
-  } catch (const std::invalid_argument& e) {}
+  } catch (const zfp::header_exception& e) {}
 
   try {
     return new zfp::array3d(header, buffer, bufferSize);
-  } catch (const std::invalid_argument& e) {}
+  } catch (const zfp::header_exception& e) {}
 
   return 0;
 }
