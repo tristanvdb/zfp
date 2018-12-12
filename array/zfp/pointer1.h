@@ -21,7 +21,9 @@ protected:
   friend class array1;
   friend class reference;
   explicit pointer(reference r) : ref(r) {}
+public:
   explicit pointer(array1* array, uint i) : ref(array, i) {}
+protected:
   ptrdiff_t index() const { return ref.i; }
   void set(ptrdiff_t index) { ref.i = index; }
   void increment() { ref.i++; }
