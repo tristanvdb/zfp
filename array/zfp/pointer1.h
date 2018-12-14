@@ -29,4 +29,7 @@ protected:
   void increment() { ref.i++; }
   void decrement() { ref.i--; }
   reference ref;
+
+public:
+  using reference_t = reference;
 };
