@@ -2,6 +2,7 @@
 class pointer {
 public:
   pointer() : ref(0, 0, 0) {}
+  pointer(std::nullptr_t n) : ref(0, 0, 0) {}
   pointer operator=(const pointer& p) { ref.array = p.ref.array; ref.i = p.ref.i; ref.j = p.ref.j; return *this; }
   reference operator*() const { return ref; }
   reference operator[](ptrdiff_t d) const { return *operator+(d); }
@@ -44,4 +45,7 @@ protected:
 
 public:
   using reference_t = reference;
+  constexpr static size_t dims = 2;
+
+  size_t size() { return ref.array->size(); }
 };
