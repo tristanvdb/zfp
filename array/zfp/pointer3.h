@@ -45,4 +45,7 @@ protected:
     }
   }
   reference ref;
+
+public:
+  array3 const & data() const { return *(ref.array); }
 };

@@ -27,4 +27,7 @@ protected:
   void increment() { ref.i++; }
   void decrement() { ref.i--; }
   reference ref;
+
+public:
+  array1 const & data() const { return *(ref.array); }
 };

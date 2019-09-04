@@ -39,4 +39,7 @@ protected:
     }
   }
   reference ref;
+
+public:
+  varray2 const & data() const { return *(ref.array); }
 };
