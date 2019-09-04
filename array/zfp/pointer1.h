@@ -2,7 +2,10 @@
 class pointer {
 public:
   pointer() : ref(0, 0) {}
+#if  __cplusplus >= 201103L
   pointer(std::nullptr_t n) : ref(0, 0) {}
+#endif
+
   pointer operator=(const pointer& p) { ref.array = p.ref.array; ref.i = p.ref.i; return *this; }
   reference operator*() const { return ref; }
   reference operator[](ptrdiff_t d) const { return *operator+(d); }
@@ -22,9 +25,7 @@ protected:
   friend class array1;
   friend class reference;
   explicit pointer(reference r) : ref(r) {}
-public:
   explicit pointer(array1* array, uint i) : ref(array, i) {}
-protected:
   ptrdiff_t index() const { return ref.i; }
   void set(ptrdiff_t index) { ref.i = index; }
   void increment() { ref.i++; }
@@ -32,8 +33,5 @@ protected:
   reference ref;
 
 public:
-  using reference_t = reference;
-  constexpr static size_t dims = 1;
-
-  size_t size() { return ref.array->size(); }
+  array1 const & data() const { return *(ref.array); }
 };
