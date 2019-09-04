@@ -65,3 +65,12 @@ install(TARGETS zfp EXPORT zfp-targets
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+configure_file(
+  ${PROJECT_SOURCE_DIR}/src/zfp-config.cmake.in
+  ${PROJECT_BINARY_DIR}/share/zfp/cmake/zfp-config.cmake)
+
+install(
+  FILES ${PROJECT_BINARY_DIR}/share/zfp/cmake/zfp-config.cmake
+  DESTINATION share/zfp/cmake/)
+
